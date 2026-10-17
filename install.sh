@@ -98,8 +98,8 @@ group_cad() {
   # cadgen sends usage stats by default; turn them off. Re-enable with: cadgen telemetry on
   run "$UVX" --no-config --managed-python --python 3.13 --from "$CADGEN" cadgen telemetry off >/dev/null || true
   ok "cadgen telemetry off"
-  mcp add build123d --command "$UV" --arg tool --arg run --arg --python --arg 3.12 --arg "$BUILD123D_MCP" \
-    --startup-timeout 180 --tool-timeout 300
+  mcp add build123d --command "$UV" --startup-timeout 180 --tool-timeout 300 \
+    -- tool run --python 3.12 "$BUILD123D_MCP"
 }
 
 group_fusion() {
@@ -112,8 +112,8 @@ group_fusion() {
   mcp add fusion --url "http://127.0.0.1:27182/mcp" --tool-timeout 300
   # faust-machines server from the pinned checkout (its PyPI 0.1.0 breaks on mcp>=2).
   link "$FAUST/addon" "$FUSION_ADDINS/Fusion360MCP"
-  mcp add fusion-tools --command "$UV" --arg run --arg --frozen --arg --directory --arg "$FAUST" \
-    --arg fusion360-mcp-server --arg --mode --arg socket --startup-timeout 180 --tool-timeout 300
+  mcp add fusion-tools --command "$UV" --startup-timeout 180 --tool-timeout 300 \
+    -- run --frozen --directory "$FAUST" fusion360-mcp-server --mode socket
   # Autodesk's older sample add-in (HTTP on port 9100); kept as a disabled fallback.
   link "$REPO/vendor/fusion/FusionMCPSample/Fusion MCP Addin" "$FUSION_ADDINS/Fusion MCP Addin"
   mcp add fusion-sample --url "http://localhost:9100/" --tool-timeout 300 --disabled
@@ -149,14 +149,14 @@ group_kicad() {
   run "$NPM" --prefix "$MX" run -s build
   local site
   site="$("$MX/venv/bin/python3" -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])' 2>/dev/null || echo "$MX/venv/lib/python3.9/site-packages")"
-  mcp add kicad --command "$NODE" --arg "$MX/dist/index.js" \
+  mcp add kicad --command "$NODE" \
     --env "KICAD_PYTHON=$MX/venv/bin/python3" --env "PYTHONPATH=$site" --env LOG_LEVEL=info \
-    --startup-timeout 120 --tool-timeout 300
+    --startup-timeout 120 --tool-timeout 300 -- "$MX/dist/index.js"
 
   # kicad-mcp-pro: read-only review, ERC/DRC and the project quality gate.
-  mcp add kicad-review --command "$UVX" --arg "$KICAD_MCP_PRO" --arg --transport --arg stdio \
+  mcp add kicad-review --command "$UVX" \
     --env KICAD_MCP_PROFILE=default --env KICAD_MCP_OPERATING_MODE=readonly \
-    --startup-timeout 120 --tool-timeout 300
+    --startup-timeout 120 --tool-timeout 300 -- "$KICAD_MCP_PRO" --transport stdio
 }
 
 group_tscircuit() {
@@ -179,14 +179,14 @@ group_cam() {
 group_extras() {
   say "extras: FreeCAD and Blender (only when installed)"
   if [[ -d /Applications/FreeCAD.app ]]; then
-    mcp add freecad --command "$UVX" --arg "$FREECAD_MCP" --startup-timeout 120 --tool-timeout 300
+    mcp add freecad --command "$UVX" --startup-timeout 120 --tool-timeout 300 -- "$FREECAD_MCP"
     echo "  next  copy vendor/code-cad/freecad-mcp/addon/FreeCADMCP into FreeCAD's Mod folder and start its RPC server"
   else
     skip "FreeCAD not installed"
   fi
   if [[ -d /Applications/Blender.app ]]; then
-    mcp add blender --command "$UVX" --arg "$BLENDER_MCP" --env DISABLE_TELEMETRY=true \
-      --startup-timeout 120 --tool-timeout 300
+    mcp add blender --command "$UVX" --env DISABLE_TELEMETRY=true \
+      --startup-timeout 120 --tool-timeout 300 -- "$BLENDER_MCP"
     echo "  next  install the Blender add-on: $UVX $BLENDER_MCP setup (or vendor/presentation/mcp-for-blender/addon.py)"
   else
     skip "Blender not installed"

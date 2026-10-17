@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Add, replace, or remove one MCP server entry in Codex's config.toml.
 
-  codex_mcp.py add NAME --command /abs/cmd --arg a --arg b [--env K=V] [--cwd DIR]
-                        [--disabled] [--startup-timeout 60] [--tool-timeout 300]
+  codex_mcp.py add NAME --command /abs/cmd [--env K=V] [--cwd DIR] [--disabled]
+                        [--startup-timeout 60] [--tool-timeout 300] -- arg1 --arg2 ...
   codex_mcp.py add NAME --url http://localhost:9100/
   codex_mcp.py remove NAME
   codex_mcp.py show NAME
@@ -83,14 +83,19 @@ def main() -> None:
     parser.add_argument("action", choices=["add", "remove", "show"])
     parser.add_argument("name")
     parser.add_argument("--command")
-    parser.add_argument("--arg", action="append")
     parser.add_argument("--url")
     parser.add_argument("--env", action="append", metavar="KEY=VALUE")
     parser.add_argument("--cwd")
     parser.add_argument("--disabled", action="store_true")
     parser.add_argument("--startup-timeout", type=int)
     parser.add_argument("--tool-timeout", type=int)
-    args = parser.parse_args()
+    argv = sys.argv[1:]
+    server_args: list[str] = []
+    if "--" in argv:
+        cut = argv.index("--")
+        argv, server_args = argv[:cut], argv[cut + 1 :]
+    args = parser.parse_args(argv)
+    args.arg = server_args
 
     if not re.fullmatch(r"[A-Za-z0-9_-]+", args.name):
         sys.exit(f"invalid server name: {args.name}")
