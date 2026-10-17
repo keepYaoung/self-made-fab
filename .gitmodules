@@ -1,0 +1,59 @@
+[submodule "vendor/fusion/FusionMCPSample"]
+	path = vendor/fusion/FusionMCPSample
+	url = https://github.com/AutodeskFusion360/FusionMCPSample.git
+	shallow = true
+[submodule "vendor/fusion/fusion360-mcp-server"]
+	path = vendor/fusion/fusion360-mcp-server
+	url = https://github.com/faust-machines/fusion360-mcp-server.git
+	shallow = true
+	ignore = untracked
+[submodule "vendor/fusion/Fusion360DevTools"]
+	path = vendor/fusion/Fusion360DevTools
+	url = https://github.com/AutodeskFusion360/Fusion360DevTools.git
+	shallow = true
+[submodule "vendor/code-cad/text-to-cad"]
+	path = vendor/code-cad/text-to-cad
+	url = https://github.com/earthtojake/text-to-cad.git
+	shallow = true
+[submodule "vendor/code-cad/build123d-mcp"]
+	path = vendor/code-cad/build123d-mcp
+	url = https://github.com/pzfreo/build123d-mcp.git
+	shallow = true
+[submodule "vendor/code-cad/freecad-mcp"]
+	path = vendor/code-cad/freecad-mcp
+	url = https://github.com/neka-nat/freecad-mcp.git
+	shallow = true
+[submodule "vendor/cam/AgentCADCAM"]
+	path = vendor/cam/AgentCADCAM
+	url = https://github.com/jeremylongworth-source/AgentCADCAM.git
+	shallow = true
+	ignore = untracked
+[submodule "vendor/electronics/atopile"]
+	path = vendor/electronics/atopile
+	url = https://github.com/atopile/atopile.git
+	shallow = true
+[submodule "vendor/electronics/tscircuit-skill"]
+	path = vendor/electronics/tscircuit-skill
+	url = https://github.com/tscircuit/skill.git
+	shallow = true
+[submodule "vendor/electronics/KiCAD-MCP-Server"]
+	path = vendor/electronics/KiCAD-MCP-Server
+	url = https://github.com/mixelpixx/KiCAD-MCP-Server.git
+	shallow = true
+	ignore = untracked
+[submodule "vendor/electronics/kicad-mcp-pro"]
+	path = vendor/electronics/kicad-mcp-pro
+	url = https://github.com/oaslananka/kicad-mcp-pro.git
+	shallow = true
+[submodule "vendor/presentation/mcp-for-blender"]
+	path = vendor/presentation/mcp-for-blender
+	url = https://github.com/ahujasid/mcp-for-blender.git
+	shallow = true
+[submodule "vendor/presentation/anatomy"]
+	path = vendor/presentation/anatomy
+	url = https://github.com/wheresryan22/anatomy.git
+	shallow = true
+[submodule "vendor/code-cad/cad-drawing-to-model"]
+	path = vendor/code-cad/cad-drawing-to-model
+	url = https://github.com/Anson2251/cad-drawing-to-model-skill.git
+	shallow = true

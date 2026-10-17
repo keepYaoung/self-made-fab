@@ -1,0 +1,198 @@
+# self-made-fab catalog
+# status: core (installed and enabled), optional (installed when its app exists),
+#         fallback (installed, disabled), reference (source only), watch (kept, not recommended yet)
+# score: 1-5 from the hands-on test in docs/quality-report.md; null = not tested hands-on yet.
+
+updated: 2026-10-16
+
+projects:
+  - id: fusion
+    name: Autodesk Fusion MCP (built into Fusion)
+    source: Fusion > Preferences > General > API > Fusion MCP Server
+    endpoint: http://127.0.0.1:27182/mcp
+    license: Autodesk product
+    stage: fusion
+    status: core
+    score: null
+    tested: pending Fusion sign-in
+
+  - id: fusion-tools
+    repo: faust-machines/fusion360-mcp-server
+    path: vendor/fusion/fusion360-mcp-server
+    commit: 19b9f1e
+    license: MIT
+    stars: 122
+    stage: fusion
+    status: core
+    score: null
+    tested: server starts from the pinned checkout with 93 tools; PyPI 0.1.0 crashes with mcp>=2; live Fusion test pending sign-in
+
+  - id: fusion-sample
+    repo: AutodeskFusion360/FusionMCPSample
+    path: vendor/fusion/FusionMCPSample
+    commit: 1d49ee8
+    license: MIT
+    stars: 24
+    stage: fusion
+    status: fallback
+    score: null
+    tested: not run; superseded by the built-in server
+
+  - id: fusion-devtools
+    repo: AutodeskFusion360/Fusion360DevTools
+    path: vendor/fusion/Fusion360DevTools
+    commit: 18937a8
+    license: MIT
+    stars: 38
+    stage: fusion
+    status: reference
+    score: null
+    tested: not run; utilities for writing Fusion add-ins
+
+  - id: text-to-cad
+    repo: earthtojake/text-to-cad
+    path: vendor/code-cad/text-to-cad
+    commit: 2457312
+    version: cadgen 0.7.21
+    license: MIT
+    stars: 20848
+    stage: code-cad
+    status: core
+    score: 5
+    tested: built a bracket to STEP and STL, volume matched hand calculation, rendered a snapshot; telemetry on by default (installer turns it off)
+
+  - id: build123d
+    repo: pzfreo/build123d-mcp
+    path: vendor/code-cad/build123d-mcp
+    commit: 59b2561
+    version: 0.3.91
+    license: Apache-2.0
+    stars: 113
+    stage: code-cad
+    status: core
+    score: 5
+    tested: 48 tools; bracket volume matched hand calculation to 0.01 mm3; STEP, STL and PNG written; writes only inside its working directory
+
+  - id: cad-drawing-to-model
+    repo: Anson2251/cad-drawing-to-model-skill
+    path: vendor/code-cad/cad-drawing-to-model
+    commit: 7470b5c
+    license: MIT
+    stars: 2
+    stage: code-cad
+    status: reference
+    score: null
+    tested: read only; covers reading multi-view drawings into build123d
+
+  - id: freecad
+    repo: neka-nat/freecad-mcp
+    path: vendor/code-cad/freecad-mcp
+    commit: 78bf023
+    version: 0.1.27
+    license: MIT
+    stars: 2892
+    stage: code-cad
+    status: optional
+    score: null
+    tested: server starts with 17 tools; FreeCAD not installed here
+
+  - id: agentcadcam
+    repo: jeremylongworth-source/AgentCADCAM
+    path: vendor/cam/AgentCADCAM
+    commit: 2fd5f91
+    license: MIT
+    stars: 1
+    stage: cam
+    status: core
+    score: 4
+    tested: 657 unit tests pass; NC checker caught 3 of 3 injected faults (no spindle, rapid below Z bound, inch switch)
+
+  - id: kicad
+    repo: mixelpixx/KiCAD-MCP-Server
+    path: vendor/electronics/KiCAD-MCP-Server
+    commit: cbb59a6
+    license: MIT
+    stars: 2750
+    stage: electronics
+    status: core
+    score: 4
+    tested: 244 tools; opened a KiCad demo, DRC 0, exported 21 Gerbers and a drill file; first call can arrive before its Python worker is ready
+
+  - id: kicad-review
+    repo: oaslananka/kicad-mcp-pro
+    path: vendor/electronics/kicad-mcp-pro
+    commit: 2b750d6
+    version: 4.3.0
+    license: MIT
+    stars: 131
+    stage: electronics
+    status: core
+    score: 4
+    tested: read-only by default; ERC and DRC 0 on the demo (matches kicad-cli); visual QA gave false off-board warnings
+
+  - id: tscircuit
+    repo: tscircuit/skill
+    path: vendor/electronics/tscircuit-skill
+    commit: ccfd1af
+    version: tsci 0.0.2916
+    license: MIT
+    stars: 30
+    stage: electronics
+    status: core
+    score: 4
+    tested: LED board built and exported (Gerber, drill, BOM, pick-and-place, STEP); caught a reversed LED supplier part; autorouter clearance 0.13 mm fails KiCad default rules
+
+  - id: atopile
+    repo: atopile/atopile
+    path: vendor/electronics/atopile
+    commit: 619eda7
+    version: 0.15.9
+    license: MIT
+    stars: 3992
+    stage: electronics
+    status: watch
+    score: 2
+    tested: quickstart build stops at part picking, which needs an atopile account sign-in; bundled skills target atopile's own agent
+
+  - id: blender
+    repo: ahujasid/mcp-for-blender
+    path: vendor/presentation/mcp-for-blender
+    commit: 7a0373e
+    version: 2.1.9
+    license: MIT
+    stars: 31071
+    stage: presentation
+    status: optional
+    score: null
+    tested: server starts with 9 tools; Blender not installed here; anonymous usage telemetry by default (installer sets DISABLE_TELEMETRY)
+
+  - id: anatomy
+    repo: wheresryan22/anatomy
+    path: vendor/presentation/anatomy
+    commit: e948829
+    license: MIT
+    stage: presentation
+    status: reference
+    score: null
+    tested: installed separately as the anatomy skill
+
+excluded:
+  - repo: cedrickchee/text-to-cad
+    reason: copy of earthtojake/text-to-cad
+  - repo: baibai2013/build123d-cad
+    reason: no clear license
+  - repo: Joshua-Zhang-Jiaquan/cnc
+    reason: no license, no users
+  - repo: ncmlabs/fusion360_mcp
+    reason: no updates since January 2026
+  - repo: ghostship25/CADSkill
+    reason: overlaps text-to-cad and build123d-mcp
+  - repo: jingcheng-chen/rhinomcp
+    reason: Rhino; this bundle is Fusion-centred
+  - repo: jhacksman/OpenSCAD-MCP-Server
+    reason: experimental generator, overlaps code CAD tools
+  - repo: Seeed-Studio/kicad-mcp-server
+    reason: no license file
+  - repo: ProductOfAmerica/mcp-server-kicad
+    reason: GPL-3.0 and overlaps the two KiCad servers kept
+
