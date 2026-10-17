@@ -1,104 +1,107 @@
-# 품질 점검 보고서
+# Quality report
 
-점검일: 2026-10-16 · 환경: macOS (Apple Silicon), Codex CLI 0.151.0, KiCad 10.0.6, Fusion 2704.1.23
+English · [한국어](quality-report.ko.md)
 
-각 도구에 같은 시험 과제를 주고 결과를 직접 확인했습니다. 도구가 "성공"이라고 답한 것만 보지 않고, 숫자는 손으로 계산한 값과 비교했고, 회로 검사는 KiCad 공식 검사기(kicad-cli)로 다시 돌렸습니다.
+Tested 2026-10-16 on macOS (Apple Silicon) with Codex CLI 0.151.0, KiCad 10.0.6 and Fusion 2704.1.23.
 
-## 요약
+Each tool got the same small task, and we checked the result itself rather than the tool's "success" message:
+volumes against a hand calculation, KiCad results against `kicad-cli`, and G-code checks against faults we injected on purpose.
 
-| 도구 | 점수 | 시험 내용 | 결과 |
+## Summary
+
+| Tool | Score | Task | Result |
 |---|---|---|---|
-| text-to-cad (cadgen 0.7.21) | 5/5 | ㄱ자 브래킷 → STEP·STL·렌더 | 부피 13,638.36 mm³, 손계산과 일치 |
-| build123d-mcp 0.3.91 | 5/5 | 같은 브래킷을 MCP로 | 부피·치수 일치, STEP·STL·PNG 출력 |
-| AgentCADCAM | 4/5 | 자체 테스트, G-code에 결함 주입 | 657개 통과, 결함 3/3 검출 |
-| KiCad MCP (mixelpixx) | 4/5 | 예제 기판 열기 → DRC → 거버 | DRC 0, 거버 21장+드릴 |
-| kicad-mcp-pro 4.3.0 | 4/5 | 예제 기판 ERC·DRC·품질 게이트 | ERC/DRC 0 (kicad-cli와 일치) |
-| tscircuit (tsci 0.0.2916) | 4/5 | LED 기판 설계 → 생산 파일 | 실제 극성 오류 검출, 생산 파일 완비 |
-| atopile 0.15.9 | 2/5 | 공식 quickstart 빌드 | 부품 선택 단계에서 계정 로그인 요구 |
-| Fusion 내장 MCP | 대기 | — | Fusion 로그인 후 시험 |
-| faust fusion360-mcp-server | 대기 | 서버 기동 | 고정 버전으로 93개 도구 확인, 실연결은 로그인 후 |
-| freecad-mcp, mcp-for-blender | 미평가 | 서버 기동만 | 17개 / 9개 도구, 본 프로그램 미설치 |
+| text-to-cad (cadgen 0.7.21) | 5/5 | L-bracket to STEP, STL and a render | 13,638.36 mm³, matches hand calculation |
+| build123d-mcp 0.3.91 | 5/5 | Same bracket through MCP | Volume and size match; STEP, STL, PNG written |
+| AgentCADCAM | 4/5 | Own test suite; injected G-code faults | 657 tests pass; 3 of 3 faults caught |
+| KiCAD-MCP-Server (mixelpixx) | 4/5 | Open a KiCad demo, DRC, Gerbers | DRC 0; 21 Gerbers and a drill file |
+| kicad-mcp-pro 4.3.0 | 4/5 | ERC, DRC and quality gate on the demo | ERC/DRC 0, same as `kicad-cli` |
+| tscircuit (tsci 0.0.2916) | 4/5 | LED board to fab files | Caught a reversed LED; full fab set |
+| atopile 0.15.9 | 2/5 | Official quickstart build | Stops at part picking: account sign-in required |
+| Fusion built-in MCP | pending | | Needs a signed-in Fusion session |
+| faust fusion360-mcp-server | pending | Server start | 93 tools from the pinned checkout; live test pending |
+| freecad-mcp, mcp-for-blender | not rated | Server start only | 17 and 9 tools; apps not installed |
 
-## 기계 설계
+## Mechanical
 
 ### build123d-mcp
 
-![build123d 브래킷](assets/build123d-bracket.png)
+![build123d bracket](assets/build123d-bracket.png)
 
-- 과제: 60×40×30 mm, 두께 4 mm ㄱ자 브래킷에 지름 4.4 mm 구멍 2개.
-- 손계산: 단면 344 mm² × 40 mm − 구멍 2 × π × 2.2² × 4 = 13,638.4 mm³.
-- 도구 결과: 13,638.3575 mm³, 바운딩 박스 60×40×30, 면 10개, 원통면 2개(지름 4.4) 인식.
-- 좋은 점: `measure`가 무게중심·관성·면 목록까지 돌려줘서 그림 없이도 결과를 검증할 수 있음. 서버 작업 폴더 밖에는 쓰지 못하게 막는 안전장치.
-- 주의: 작업 폴더 밖 경로로 내보내면 거부됨. Codex에서는 프로젝트 폴더가 작업 폴더라 실사용 문제는 없음.
+- Task: 60 × 40 × 30 mm L-bracket, 4 mm thick, two 4.4 mm holes.
+- Hand calculation: 344 mm² section × 40 mm − 2 × π × 2.2² × 4 = 13,638.4 mm³.
+- Tool: 13,638.3575 mm³, bounding box 60 × 40 × 30, 10 faces, both 4.4 mm cylinders recognised.
+- Good: `measure` returns centre of mass, inertia and a face inventory, so results can be checked without a picture. Writes are confined to the server's working directory.
+- Watch: exports outside the working directory are rejected. In Codex the project folder is the working directory, so this does not get in the way.
 
 ### text-to-cad
 
-![text-to-cad 브래킷](assets/text-to-cad-bracket.png)
+![text-to-cad bracket](assets/text-to-cad-bracket.png)
 
-- 같은 브래킷을 모델 스크립트(`@step`, `@stl`)로 작성 → STEP 30 KB, STL 34 KB.
-- 다시 읽어 측정한 부피 13,638.36 mm³로 build123d-mcp와 일치.
-- 렌더 품질이 가장 좋음. 도면·DXF·DFM·G-code·외주 견적(SendCutSend, Bambu) 스킬까지 묶여 있음.
-- 주의: 사용 통계 전송이 기본으로 켜져 있음 → 설치 스크립트가 끔.
+- Same bracket as a model script (`@step`, `@stl`): STEP 30 KB, STL 34 KB.
+- Re-imported volume 13,638.36 mm³, matching build123d-mcp.
+- Best renders of the set, and it bundles drawing, DXF, DFM, slicing and fab-service skills.
+- Watch: usage telemetry is on by default upstream; the installer turns it off.
 
-## 가공
+## CAM
 
 ### AgentCADCAM
 
-- 자체 검증: 기반 검사, 스키마 108건, 단위 테스트 657개 모두 통과.
-- 결함 주입 시험 (예제 밀링 프로그램을 일부러 망가뜨림):
+- Foundation check, 108 schema instances and 657 unit tests pass.
+- Fault injection on the bundled milling program:
 
-| 넣은 결함 | 검출 |
+| Injected fault | Caught |
 |---|---|
-| 스핀들을 켜지 않고 절삭 이동 | 해당 5줄 지적 |
-| 급속 이동으로 Z−5까지 하강 | "Z-5가 허용 범위 초과" |
-| mm → inch 전환 (G21 → G20) | 단위 불일치·미지원 명령으로 차단 |
+| Feed moves with the spindle never started | Flags all 5 lines |
+| Rapid move down to Z−5 | "Z-5 exceeds declared fixture coordinate bound" |
+| mm switched to inch (G21 → G20) | Blocks on unit conflict and unsupported command |
 
-- 좋은 점: 어떤 경우에도 "사람 승인·시뮬레이션 필요"를 붙여 실행 허가를 내주지 않음. 확인 못 한 범위를 결과에 그대로 적음.
-- 주의: 기계·공구·컨트롤러 정보를 JSON으로 먼저 채워야 의미 있는 검사가 됨. 별 1개의 신생 프로젝트라 4점.
+- Good: it never grants permission to run; every result carries "human approval" and "simulation" blockers, and it states what it did not check.
+- Watch: machine, tool and controller context must be filled in as JSON for the checks to mean anything. New project with one star, hence 4.
 
-## 회로·기판
+## Electronics
 
-### KiCad MCP (mixelpixx)
+### KiCAD-MCP-Server (mixelpixx)
 
-- KiCad 예제 `pic_programmer`(부품 63개, 배선 370개)로 시험.
-- 프로젝트 열기 → 기판 정보(160×99 mm) → DRC 0건 → 거버 21장 + 드릴 파일 생성.
-- 좋은 점: 편집·배선·자동 배선·부품 검색(JLCPCB, DigiKey)·생산 파일까지 전부 가능.
-- 주의: 도구가 244개라 이름으로 찾기보다 `search_tools`로 찾아야 함. 서버가 켜진 직후 1초 안에 호출하면 "Python process is not running" 오류 → 잠시 후 재시도. 거버 기본값이 모든 레이어를 출력하므로 생산용은 레이어 지정 필요.
+- KiCad demo `pic_programmer` (63 footprints, 370 tracks).
+- Open project, board info (160 × 99 mm), DRC 0, 21 Gerbers plus a drill file.
+- Good: covers editing, routing, autorouting, part search (JLCPCB, DigiKey) and every fab export.
+- Watch: 244 tools, so find them with `search_tools`. A call in the first second after start can fail with "Python process is not running"; retry. Gerber export plots every layer unless `layers` is given.
 
 ### kicad-mcp-pro
 
-- 같은 예제로 ERC 0건, DRC 0건. kicad-cli 직접 검사와 같은 결과.
-- 좋은 점: 기본이 읽기 전용이라 실수로 설계를 바꿀 위험이 없음. 결과마다 PASS/WARN/FAIL과 다음 행동을 알려줌.
-- 주의: 시각 검사(`pcb_visual_qa`)가 정상 부품 5개를 "기판 밖"이라고 잘못 경고함.
+- Same demo: ERC 0, DRC 0, identical to running `kicad-cli` directly.
+- Good: read-only by default, and each result carries PASS/WARN/FAIL plus a next action.
+- Watch: `pcb_visual_qa` wrongly reported five parts as off-board.
 
-### KiCad 첫 설정에서 발견한 문제
+### KiCad first-run problem
 
-KiCad를 한 번도 열지 않은 상태에서는 전역 라이브러리 목록이 없어서 ERC 44건, DRC 41건이 전부 "라이브러리 없음" 경고로 나옴. 템플릿의 `fp-lib-table`, `sym-lib-table`을 복사하자 0건이 됨. 설치 스크립트가 자동 처리.
+With KiCad never opened, the global library tables do not exist, and ERC/DRC report 44 and 41 "library not in configuration" warnings. Copying `fp-lib-table` and `sym-lib-table` from KiCad's template folder brings both to 0. The installer does this.
 
 ### tscircuit
 
-![tscircuit LED 기판](assets/tscircuit-led.png)
+![tscircuit LED board](assets/tscircuit-led.png)
 
-- 과제: 2핀 전원 헤더 + 330Ω 저항 + 빨간 LED, 20×15 mm 기판.
-- 생산 파일: 거버 10장, 드릴, BOM(JLCPCB 부품번호 포함), 부품 배치 파일, STEP.
-- 실제 오류 검출: 자동 선택된 JLCPCB LED(C3030991)는 1번 핀이 음극인데 회로는 1번 핀을 양극으로 사용 → 빌드 실패로 막아줌. 그대로 만들었다면 LED가 켜지지 않았을 것.
-- 교차 검증: KiCad 형식으로 내보내 kicad-cli로 검사 → 위반 26건. 원인은 자동 배선 폭 0.15 mm, 간격 0.13 mm로 KiCad 기본 규칙(0.2 mm)보다 좁기 때문. JLCPCB 표준 공정으로는 제작 가능한 수치지만 여유가 적음.
+- Task: 2-pin header, 330 Ω resistor and red LED on a 20 × 15 mm board.
+- Output: 10 Gerber layers, drill, BOM with JLCPCB part numbers, pick-and-place, STEP.
+- Real catch: the auto-picked JLCPCB LED (C3030991) has pin 1 as cathode, while the circuit used pin 1 as anode. The build failed until `pinLabels` matched; built as drawn, the LED would not have lit.
+- Cross-check: exported to KiCad and run through `kicad-cli`: 26 violations, from 0.15 mm tracks and 0.13 mm clearance against KiCad's 0.2 mm defaults. JLCPCB's standard process can make this, but with little margin.
 
 ### atopile
 
-- 설치(0.15.9)와 컴파일 단계는 통과, 부품 자동 선택 단계에서 "Sign-in required"로 중단.
-- atopile이 웹 서비스(app.atopile.io)로 옮겨 가는 중이라 오프라인 개인 작업에는 불리함.
-- 저장소의 스킬 대부분이 atopile 자체 에이전트·개발자용(컴파일러, LSP, Zig 바인딩 등).
+- Installs (0.15.9) and compiles, then stops at part picking with "Sign-in required".
+- The project is moving to app.atopile.io, which makes it a poor fit for offline personal work today.
+- Most bundled skills target atopile's own agent and contributors (compiler, LSP, Zig bindings).
 
-## 연결 확인만 한 도구
+## Start-up only
 
-| 도구 | 결과 | 이유 |
+| Tool | Result | Why not further |
 |---|---|---|
-| faust fusion360-mcp-server | PyPI 0.1.0은 `mcp>=2`에서 즉시 종료. 저장소 고정 버전으로 실행하면 93개 도구 | Fusion 로그인 대기 |
-| freecad-mcp 0.1.27 | 17개 도구로 기동 | FreeCAD 미설치 |
-| mcp-for-blender 2.1.9 | 9개 도구로 기동, 기본 익명 통계 전송 | Blender 미설치 |
+| faust fusion360-mcp-server | PyPI 0.1.0 exits at start with `mcp>=2`; the pinned checkout runs with 93 tools | Waiting for a signed-in Fusion |
+| freecad-mcp 0.1.27 | Starts with 17 tools | FreeCAD not installed |
+| mcp-for-blender 2.1.9 | Starts with 9 tools; anonymous usage telemetry by default | Blender not installed |
 
-## 다시 점검하는 방법
+## Reproduce
 
 ```bash
 ./install.sh --check

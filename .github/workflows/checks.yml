@@ -1,0 +1,28 @@
+name: checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: shellcheck
+        run: shellcheck -S warning install.sh
+      - name: Python syntax
+        run: python -m py_compile scripts/*.py tests/*.py
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Catalog matches submodules
+        run: python scripts/check_catalog.py
+      - name: Skill frontmatter
+        run: |
+          head -1 skills/self-made-fab/SKILL.md | grep -qx -- '---'
+          grep -q '^name: self-made-fab$' skills/self-made-fab/SKILL.md
+          grep -q '^description: ' skills/self-made-fab/SKILL.md
+
